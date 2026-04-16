@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: roboshop                # Name of the Argo CD application
+  namespace: argocd              # Must be the namespace where Argo CD is installed
+  finalizers:
+    # The default behaviour is foreground cascading deletion
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default               # Argo CD project (default if not customized)
+  source:
+    repoURL: https://github.com/akhilnaidu1997/payment-deploy.git  # Git repo containing manifests
+    targetRevision: main          # Git branch, tag, or commit SHA
+    path: .
+    helm:
+      releaseName: payment
+      valueFiles:
+      - values-dev.yaml               
+
+  destination:
+    server: https://kubernetes.default.svc  # Target cluster (in-cluster here)
+    namespace: argocd                    # Namespace where app will be deployed
+
+  syncPolicy:
+    automated:
+      prune: true                 # Remove resources not in Git
+      selfHeal: true              # Automatically sync drifted resources
